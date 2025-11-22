@@ -219,12 +219,20 @@ function writeMediaCfgToBotRoot(next: {
 
 const uploadMediaDisk = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (
+      req: express.Request,
+      file: Express.Multer.File,
+      cb: (error: any, destination: string) => void
+    ) => {
       const TMP_DIR = path.join(process.cwd(), "uploads_tmp");
       if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
       cb(null, TMP_DIR);
     },
-    filename: (req, file, cb) => {
+    filename: (
+      req: express.Request,
+      file: Express.Multer.File,
+      cb: (error: any, filename: string) => void
+    ) => {
       const ext = path.extname(file.originalname) || "";
       const base = file.mimetype.startsWith("video/")
         ? "video-"
@@ -1264,7 +1272,7 @@ async function sendOne(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const j = await r.json().catch(() => ({}));
+      const j: any = await r.json().catch(() => ({} as any));
       const ok = !!j?.ok;
 
       appendHistoryRow(
@@ -1298,7 +1306,7 @@ async function sendOne(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payloadForBot),
     });
-    const j = await r.json().catch(() => ({}));
+    const j: any = await r.json().catch(() => ({} as any));
     const ok = (r as any).ok && j?.ok;
 
     appendHistoryRow(
