@@ -2,5 +2,7 @@ node_modules/
 .env
 uploads/
 uploads_tmp/
-data/*.json
+data/
 dist/
+*.log
+*.csv
