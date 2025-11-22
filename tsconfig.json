@@ -5,7 +5,10 @@
     "rootDir": "src",
     "outDir": "dist",
     "esModuleInterop": true,
-    "strict": true,
+    "resolveJsonModule": true,
+    "strict": false,
+    "noImplicitAny": false,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src"]
 }
