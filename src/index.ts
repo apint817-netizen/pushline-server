@@ -41,7 +41,7 @@ const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // CORS пока максимально простой. При деплое можно сузить список доменов.
-app.use(cors({ origin: "*"}));
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json({ limit: "10mb" }));
 
 /* ================== ПУТИ/ФАЙЛЫ ================== */
@@ -221,8 +221,8 @@ const uploadMediaDisk = multer({
   storage: multer.diskStorage({
     destination: (
       req: express.Request,
-      file: Express.Multer.File,
-      cb: (error: any, destination: string) => void
+      file: any,
+      cb: (error: Error | null, destination: string) => void
     ) => {
       const TMP_DIR = path.join(process.cwd(), "uploads_tmp");
       if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
@@ -230,8 +230,8 @@ const uploadMediaDisk = multer({
     },
     filename: (
       req: express.Request,
-      file: Express.Multer.File,
-      cb: (error: any, filename: string) => void
+      file: any,
+      cb: (error: Error | null, filename: string) => void
     ) => {
       const ext = path.extname(file.originalname) || "";
       const base = file.mimetype.startsWith("video/")
@@ -441,11 +441,19 @@ const broadcastState: BroadcastState = {
 })();
 function persistContacts() {
   ensureDataDir();
-  fs.writeFileSync(BROADCAST_CONTACTS_FILE, JSON.stringify(broadcastState.contacts, null, 2), "utf8");
+  fs.writeFileSync(
+    BROADCAST_CONTACTS_FILE,
+    JSON.stringify(broadcastState.contacts, null, 2),
+    "utf8"
+  );
 }
 function persistTemplates() {
   ensureDataDir();
-  fs.writeFileSync(BROADCAST_TEMPLATES_FILE, JSON.stringify(broadcastState.templates, null, 2), "utf8");
+  fs.writeFileSync(
+    BROADCAST_TEMPLATES_FILE,
+    JSON.stringify(broadcastState.templates, null, 2),
+    "utf8"
+  );
 }
 
 /* ================== helpers ================== */
@@ -494,7 +502,7 @@ function buildMediaByMode(mode: MediaMode) {
       : cfg.imagePath
       ? [cfg.imagePath]
       : []
-    ).filter((p) => p && fs.existsSync(p));
+    ).filter((p) => p && fs.existsExistsSync(p as any));
 
     for (const p of imgs) {
       media.push({ type: "image", path: p });
@@ -535,7 +543,7 @@ app.post("/inbox/fake", (req, res) => {
   saveInbox();
   res.json(fake);
 });
-app.post("/api/inbox/fake", (req, res) => (req.url = "/inbox/fake", (app as any).handle(req, res)));
+app.post("/api/inbox/fake", (req, res) => ((req.url = "/inbox/fake"), (app as any).handle(req, res)));
 
 app.post("/api/ai-assistant", async (req, res) => {
   try {
@@ -551,7 +559,6 @@ app.post("/api/ai-assistant", async (req, res) => {
       return res.status(400).json({ error: "messages is required" });
     }
 
-    // System-промпт, чтобы ИИ знал, что такое Pushline
     const systemMessage = {
       role: "system" as const,
       content: `
@@ -586,7 +593,7 @@ app.post("/api/ai-assistant", async (req, res) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://pushline.local", // можешь заменить
+        "HTTP-Referer": "https://pushline.local",
         "X-Title": "Pushline AI Assistant",
       },
       body: JSON.stringify(payload),
@@ -699,7 +706,9 @@ app.patch("/inbox/:id/assign", (req, res) => {
   saveOperators();
   res.json({ ok: true, message: chat, operator: op });
 });
-app.patch("/api/inbox/:id/assign", (req, res) => (req.url = `/inbox/${req.params.id}/assign`, (app as any).handle(req, res)));
+app.patch("/api/inbox/:id/assign", (req, res) => (
+  (req.url = `/inbox/${req.params.id}/assign`), (app as any).handle(req, res)
+));
 
 app.patch("/inbox/:id/read", (req, res) => {
   const { id } = req.params;
@@ -710,7 +719,9 @@ app.patch("/inbox/:id/read", (req, res) => {
   }
   res.json({ ok: true });
 });
-app.patch("/api/inbox/:id/read", (req, res) => (req.url = `/inbox/${req.params.id}/read`, (app as any).handle(req, res)));
+app.patch("/api/inbox/:id/read", (req, res) => (
+  (req.url = `/inbox/${req.params.id}/read`), (app as any).handle(req, res)
+));
 
 app.delete("/inbox/:id", (req, res) => {
   const { id } = req.params;
@@ -720,7 +731,9 @@ app.delete("/inbox/:id", (req, res) => {
   saveInbox();
   return res.json({ ok: true, removedId: removed.id });
 });
-app.delete("/api/inbox/:id", (req, res) => (req.url = `/inbox/${req.params.id}`, (app as any).handle(req, res)));
+app.delete("/api/inbox/:id", (req, res) => (
+  (req.url = `/inbox/${req.params.id}`), (app as any).handle(req, res)
+));
 
 app.delete("/inbox", (req, res) => {
   const count = inboxMessages.length;
@@ -728,7 +741,7 @@ app.delete("/inbox", (req, res) => {
   saveInbox();
   return res.json({ ok: true, removedCount: count });
 });
-app.delete("/api/inbox", (req, res) => (req.url = "/inbox", (app as any).handle(req, res)));
+app.delete("/api/inbox", (req, res) => ((req.url = "/inbox"), (app as any).handle(req, res)));
 
 /* ================== OPERATORS ================== */
 
@@ -751,7 +764,9 @@ app.patch("/operators/:id", (req, res) => {
   saveOperators();
   res.json(op);
 });
-app.patch("/api/operators/:id", (req, res) => (req.url = `/operators/${req.params.id}`, (app as any).handle(req, res)));
+app.patch("/api/operators/:id", (req, res) => (
+  (req.url = `/operators/${req.params.id}`), (app as any).handle(req, res)
+));
 
 /* ================== MEDIA UPLOAD ================== */
 
@@ -761,7 +776,7 @@ function uploadImageHandler(req: express.Request, res: express.Response) {
   try {
     if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
-    const file = (req as any).file as Express.Multer.File;
+    const file = (req as any).file as any;
     const ext = path.extname(file.originalname || "") || ".jpg";
 
     const destPath = path.join(
@@ -775,8 +790,6 @@ function uploadImageHandler(req: express.Request, res: express.Response) {
 
     const curCfg = readMediaCfg();
 
-    // копим все картинки, а ограничение по количеству
-    // уже делает writeMediaCfgToBotRoot (MAX_IMAGES)
     let nextImagePaths = [...curCfg.imagePaths, destPath].filter(
       (p) => p && fs.existsSync(p)
     );
@@ -827,13 +840,12 @@ app.get("/broadcast/media", (req, res) => {
   const toWeb = (fullPath: string | "") =>
     fullPath ? `/uploads/${path.basename(fullPath)}` : "";
 
-  // все картинки, которые есть в media_config.json
   const imagesArr = (cfg.imagePaths || [])
     .filter((p) => p && fs.existsSync(p))
     .map((p) => ({
       filename: path.basename(p),
-      webUrl: toWeb(p), // для превью в браузере
-      path: p,          // ПОЛНЫЙ путь на диске — этим будет пользоваться сценарий
+      webUrl: toWeb(p),
+      path: p,
     }));
 
   const mainImage =
@@ -852,7 +864,7 @@ app.get("/broadcast/media", (req, res) => {
       ? {
           filename: path.basename(cfg.videoPath),
           webUrl: toWeb(cfg.videoPath),
-          path: cfg.videoPath, // тоже полный путь
+          path: cfg.videoPath,
         }
       : null;
 
@@ -863,7 +875,9 @@ app.get("/broadcast/media", (req, res) => {
     video: vid,
   });
 });
-app.get("/api/broadcast/media", (req, res) => (req.url = "/broadcast/media", (app as any).handle(req, res)));
+app.get("/api/broadcast/media", (req, res) => (
+  (req.url = "/broadcast/media"), (app as any).handle(req, res)
+));
 
 /* ====== CLEAR MEDIA (очистка медиа для рассылки) ====== */
 
@@ -871,10 +885,8 @@ function clearBroadcastMediaHandler(_req: express.Request, res: express.Response
   try {
     console.log("[broadcast/media/clear] requested");
 
-    // 0) читаем текущий конфиг, чтобы удалить именно те файлы, которые в нём записаны
     const cfg = readMediaCfg();
 
-    // 1) удаляем файлы из media_config.json (если они есть)
     if (cfg.imagePath) {
       safeUnlink(cfg.imagePath);
     }
@@ -887,7 +899,6 @@ function clearBroadcastMediaHandler(_req: express.Request, res: express.Response
       }
     }
 
-    // 2) дополнительно чистим uploads/ по маскам (current_*, img-*, video-*)
     if (fs.existsSync(UPLOADS_DIR)) {
       const files = fs.readdirSync(UPLOADS_DIR);
       for (const f of files) {
@@ -903,14 +914,12 @@ function clearBroadcastMediaHandler(_req: express.Request, res: express.Response
       }
     }
 
-    // 3) сбрасываем media_config.json (то, что читает send_pushline.js)
     writeMediaCfgToBotRoot({
       imagePath: "",
       videoPath: "",
       imagePaths: [],
     });
 
-    // 4) сбрасываем in-memory состояние
     broadcastMedia.imagePath = "";
     broadcastMedia.videoPath = "";
 
@@ -925,7 +934,6 @@ function clearBroadcastMediaHandler(_req: express.Request, res: express.Response
   }
 }
 
-// Оба маршрута явно навешиваем на один и тот же handler
 app.post("/broadcast/media/clear", clearBroadcastMediaHandler);
 app.post("/api/broadcast/media/clear", clearBroadcastMediaHandler);
 
@@ -1025,7 +1033,10 @@ function uploadTemplatesHandler(req: express.Request, res: express.Response) {
     if (filename.endsWith(".json")) {
       const parsed = JSON.parse(buf);
       if (Array.isArray(parsed)) {
-        newTemplates = parsed.filter((x) => typeof x === "string").map((x) => x.trim()).filter(Boolean);
+        newTemplates = parsed
+          .filter((x) => typeof x === "string")
+          .map((x) => x.trim())
+          .filter(Boolean);
       } else if (parsed && Array.isArray((parsed as any).templates)) {
         newTemplates = (parsed as any).templates
           .filter((x: any) => typeof x === "string")
@@ -1043,7 +1054,12 @@ function uploadTemplatesHandler(req: express.Request, res: express.Response) {
   persistTemplates();
 
   const plan = computePlan(broadcastState.contacts.length);
-  return res.json({ ok: true, templates: newTemplates.length, totalTemplates: broadcastState.templates.length, plan });
+  return res.json({
+    ok: true,
+    templates: newTemplates.length,
+    totalTemplates: broadcastState.templates.length,
+    plan,
+  });
 }
 app.post("/upload-templates", upload.single("file"), uploadTemplatesHandler);
 app.post("/api/templates/upload", upload.single("file"), uploadTemplatesHandler);
@@ -1051,7 +1067,7 @@ app.post("/api/templates/upload", upload.single("file"), uploadTemplatesHandler)
 app.get("/templates", (req, res) => {
   res.json({ ok: true, templates: broadcastState.templates });
 });
-app.get("/api/templates", (req, res) => (req.url = "/templates", (app as any).handle(req, res)));
+app.get("/api/templates", (req, res) => ((req.url = "/templates"), (app as any).handle(req, res)));
 
 /* ================== BROADCAST SCRIPT API (новый) ================== */
 
@@ -1089,8 +1105,7 @@ app.post("/broadcast/script", (req, res) => {
         if (s.mediaType !== "image" && s.mediaType !== "video") return null;
         if (typeof s.path !== "string") return null;
 
-        const caption =
-          typeof s.caption === "string" ? s.caption.trim() : "";
+        const caption = typeof s.caption === "string" ? s.caption.trim() : "";
 
         const captionVariants = Array.isArray(s.captionVariants)
           ? s.captionVariants
@@ -1134,12 +1149,21 @@ function uploadAutoRepliesHandler(req: express.Request, res: express.Response) {
     if (filename.endsWith(".json")) {
       const j = JSON.parse(buf);
       if (Array.isArray(j)) {
-        thanks = j.filter((x: any) => typeof x === "string").map((s: string) => s.trim()).filter(Boolean);
+        thanks = j
+          .filter((x: any) => typeof x === "string")
+          .map((s: string) => s.trim())
+          .filter(Boolean);
       } else {
         if (Array.isArray(j.thanks))
-          thanks = j.thanks.filter((x: any) => typeof x === "string").map((s: string) => s.trim()).filter(Boolean);
+          thanks = j.thanks
+            .filter((x: any) => typeof x === "string")
+            .map((s: string) => s.trim())
+            .filter(Boolean);
         if (Array.isArray(j.negative))
-          negative = j.negative.filter((x: any) => typeof x === "string").map((s: string) => s.trim()).filter(Boolean);
+          negative = j.negative
+            .filter((x: any) => typeof x === "string")
+            .map((s: string) => s.trim())
+            .filter(Boolean);
       }
     } else {
       const split = buf.split(/^\s*===\s*NEGATIVE\s*===\s*$/im);
@@ -1175,12 +1199,15 @@ app.get("/autoreplies", (req, res) => {
     },
   });
 });
-app.get("/api/autoreplies", (req, res) => (req.url = "/autoreplies", (app as any).handle(req, res)));
+app.get("/api/autoreplies", (req, res) => (
+  (req.url = "/autoreplies"), (app as any).handle(req, res)
+));
 
 /* ================== BROADCAST ================== */
 
 function getBroadcastStatus() {
-  const { status, sent, errors, startedAt, wavesTotal, waveIndex, cooldownUntil, mode } = broadcastState.run;
+  const { status, sent, errors, startedAt, wavesTotal, waveIndex, cooldownUntil, mode } =
+    broadcastState.run;
   const total = broadcastState.contacts.length;
   return {
     ok: true,
@@ -1201,10 +1228,14 @@ app.get("/broadcast/plan", (req, res) => {
   const total = broadcastState.contacts.length;
   return res.json({ ok: true, plan: computePlan(total) });
 });
-app.get("/api/broadcast/plan", (req, res) => (req.url = "/broadcast/plan", (app as any).handle(req, res)));
+app.get("/api/broadcast/plan", (req, res) => (
+  (req.url = "/broadcast/plan"), (app as any).handle(req, res)
+));
 
 app.get("/broadcast/status", (req, res) => res.json(getBroadcastStatus()));
-app.get("/api/broadcast/status", (req, res) => (req.url = "/broadcast/status", (app as any).handle(req, res)));
+app.get("/api/broadcast/status", (req, res) => (
+  (req.url = "/broadcast/status"), (app as any).handle(req, res)
+));
 
 async function sendOne(
   to: string,
@@ -1212,7 +1243,6 @@ async function sendOne(
   fallbackText: string,
   mode: MediaMode
 ): Promise<boolean> {
-  // 1) Пытаемся найти сценарий (blocks -> script)
   const rawScript = readBroadcastScript();
   if (rawScript.length > 0) {
     try {
@@ -1295,7 +1325,6 @@ async function sendOne(
     }
   }
 
-  // 2) Если сценария нет — старая логика: text + media
   try {
     const mediaPayload = buildMediaByMode(mode);
     const payloadForBot: any = { to, text: fallbackText };
@@ -1376,7 +1405,6 @@ async function waveHandler(req: express.Request, res: express.Response) {
 
     let text = "";
 
-    // Если НЕТ script – работаем по старому (через шаблоны)
     if (!scriptExists) {
       const tpl = pickRandom(broadcastState.templates);
       if (!tpl) continue;
@@ -1404,7 +1432,8 @@ async function waveHandler(req: express.Request, res: express.Response) {
     if (!isRunning()) break;
   }
 
-  const processedCount = toProcess.findIndex((_, i) => !isRunning() && i >= 0) >= 0 ? 0 : toProcess.length;
+  const processedCount =
+    toProcess.findIndex((_, i) => !isRunning() && i >= 0) >= 0 ? 0 : toProcess.length;
   broadcastState.contacts = broadcastState.contacts.slice(processedCount);
   persistContacts();
 
@@ -1412,7 +1441,10 @@ async function waveHandler(req: express.Request, res: express.Response) {
     broadcastState.run.status = "done";
   } else {
     if (isRunning()) {
-      broadcastState.run.waveIndex = Math.min(broadcastState.run.waveIndex + 1, broadcastState.run.wavesTotal);
+      broadcastState.run.waveIndex = Math.min(
+        broadcastState.run.waveIndex + 1,
+        broadcastState.run.wavesTotal
+      );
     }
   }
 
@@ -1443,7 +1475,6 @@ async function fireHandler(req: express.Request, res: express.Response) {
   const plan = computePlan(broadcastState.contacts.length);
   res.json({ ok: true, started: true, plan });
 
-  // инициализируем состояние забега
   broadcastState.run.status = "running";
   broadcastState.run.startedAt = Date.now();
   broadcastState.run.sent = 0;
@@ -1456,17 +1487,14 @@ async function fireHandler(req: express.Request, res: express.Response) {
   const limit = Math.max(1, SAFE_MODE_LIMIT);
   const scriptExists = readBroadcastScript().length > 0;
 
-  // основной цикл по "волнам"
   while (broadcastState.contacts.length > 0 && isRunning()) {
     const batch = broadcastState.contacts.slice(0, limit);
 
-    // проходимся по каждому контакту в батче
     for (const c of batch) {
       if (!isRunning()) break;
 
       let text = "";
 
-      // если скрипта нет — берём текст из шаблонов как раньше
       if (!scriptExists) {
         const tpl = pickRandom(broadcastState.templates);
         if (!tpl) continue;
@@ -1494,12 +1522,10 @@ async function fireHandler(req: express.Request, res: express.Response) {
       if (!isRunning()) break;
     }
 
-    // урезаем очередь контактов на размер батча
     const actuallySentOrTried = batch.length;
     broadcastState.contacts = broadcastState.contacts.slice(actuallySentOrTried);
     persistContacts();
 
-    // если ещё остались контакты и мы всё ещё "running" — включаем cooldown
     if (broadcastState.contacts.length > 0 && isRunning()) {
       broadcastState.run.waveIndex = Math.min(
         broadcastState.run.waveIndex + 1,
@@ -1551,7 +1577,10 @@ function appendHistoryRow(
   details: string
 ) {
   ensureResultsHeader();
-  const ts = new Date().toISOString().replace("T", " ").replace("Z", "");
+  const ts = new Date()
+    .toISOString()
+    .replace("T", " ")
+    .replace("Z", "");
   const safeName = String(name ?? "").replace(/,/g, " ");
   const safeDetails = String(details ?? "").replace(/,/g, " ");
   const line = `${ts},${phone},${safeName},${status},${safeDetails}\n`;
@@ -1585,9 +1614,7 @@ function readResultsCsv(limit = 500): HistoryRow[] {
     .filter(Boolean) as HistoryRow[];
 }
 
-// ищем «последнюю волну» — подряд идущие SENT_OK с конца файла
 function detectLastWave(records: HistoryRow[]): HistoryRow[] {
-  // создаём копию массива и идём с конца
   const rev = [...records].reverse();
   const wave: HistoryRow[] = [];
 
@@ -1596,7 +1623,7 @@ function detectLastWave(records: HistoryRow[]): HistoryRow[] {
     wave.push(r);
   }
 
-  return wave.reverse(); // обратно в хронологический порядок
+  return wave.reverse();
 }
 
 app.get("/api/broadcast/last", (req, res) => {
@@ -1636,7 +1663,6 @@ async function testDirectHandler(req: express.Request, res: express.Response) {
     const { to, text, mode } = (req.body || {}) as any;
     if (!to) return res.status(400).json({ ok: false, error: "to required" });
 
-    // 1) Если есть сценарий — тестируем именно его (как есть)
     const script = readBroadcastScript();
     if (script.length > 0) {
       const r = await fetch(`${BOT_API_BASE}/sendDirect`, {
@@ -1648,7 +1674,6 @@ async function testDirectHandler(req: express.Request, res: express.Response) {
       return res.json(data);
     }
 
-    // 2) Если сценария нет — старая логика (текст + медиа)
     const modeFromReq: MediaMode =
       mode === "video" || mode === "both" || mode === "text" || mode === "image" ? mode : "image";
 
