@@ -1574,7 +1574,7 @@ function appendHistoryRow(
   phone: string,
   name: string | undefined,
   status: string,
-  details: unknown      // ← было: string
+  details: unknown
 ) {
   ensureResultsHeader();
 
@@ -1583,8 +1583,8 @@ function appendHistoryRow(
     .replace("T", " ")
     .replace("Z", "");
 
-  const safeName: string = String(name ?? "").replace(/,/g, " ");
-  const safeDetails: string = String(details ?? "").replace(/,/g, " ");
+  const safeName = String(name ?? "").replace(/,/g, " ");
+  const safeDetails = String(details as any ?? "").replace(/,/g, " ");
 
   const line = `${ts},${phone},${safeName},${status},${safeDetails}\n`;
   fs.appendFileSync(RESULTS_CSV, line, "utf8");
