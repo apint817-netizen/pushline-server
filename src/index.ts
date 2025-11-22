@@ -466,7 +466,7 @@ function randomBetween(a: number, b: number) {
 }
 function detectTopic(text: string): string {
   const msg = (text || "").toLowerCase();
-  for (const t of routingConfig.topics || []) {
+  for (const t of (routingConfig.topics || [])) {
     if (t.match?.some((kw) => msg.includes(kw.toLowerCase()))) return t.topic;
   }
   return "Общее";
@@ -1186,7 +1186,7 @@ function uploadAutoRepliesHandler(req: express.Request, res: express.Response) {
   });
 }
 app.post("/upload-autoreplies", upload.single("file"), uploadAutoRepliesHandler);
-app.post("/api/autoreplies/upload", upload.single("file"), uploadAutoRepliesHandler);
+app.post("/api/autoreplies/upload", uploadAutoRepliesHandler);
 
 app.get("/autoreplies", (req, res) => {
   const cur = readAutoReplies();
@@ -1547,9 +1547,6 @@ async function fireHandler(req: express.Request, res: express.Response) {
   }
 }
 
-app.post("/broadcast/fire", fireHandler);
-app.post("/api/broadcast/fire", fireHandler);
-
 /* ====== История рассылок ====== */
 
 const RESULTS_CSV = path.join(BOT_ROOT, "results.csv");
@@ -1574,7 +1571,7 @@ function appendHistoryRow(
   phone: string,
   name: string | undefined,
   status: string,
-  details: unknown
+  details: string
 ) {
   ensureResultsHeader();
 
@@ -1584,7 +1581,7 @@ function appendHistoryRow(
     .replace("Z", "");
 
   const safeName = String(name ?? "").replace(/,/g, " ");
-  const safeDetails = String(details as any ?? "").replace(/,/g, " ");
+  const safeDetails = String(details ?? "").replace(/,/g, " ");
 
   const line = `${ts},${phone},${safeName},${status},${safeDetails}\n`;
   fs.appendFileSync(RESULTS_CSV, line, "utf8");
