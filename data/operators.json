@@ -1,0 +1,29 @@
+[
+  {
+    "id": "op_sarkis",
+    "name": "Саркис",
+    "role": "admin",
+    "online": true,
+    "activeChats": 6,
+    "load": 30,
+    "phone": "+79614305013"
+  },
+  {
+    "id": "op_david",
+    "name": "Давид",
+    "role": "operator",
+    "online": true,
+    "activeChats": 5,
+    "load": 25,
+    "phone": "+7918567533"
+  },
+  {
+    "id": "op_vlad",
+    "name": "Владислав",
+    "role": "operator",
+    "online": true,
+    "activeChats": 5,
+    "load": 25,
+    "phone": "+79889401003"
+  }
+]

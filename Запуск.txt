@@ -1,0 +1,2 @@
+cd "E:\Проекты\Боты\Pushline_Bot\PushlinePult\server"
+npm run dev

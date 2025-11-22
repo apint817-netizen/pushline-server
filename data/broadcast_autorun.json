@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "mode": "image",
+  "wave": 0,
+  "offset": 0,
+  "waves": 0,
+  "limit": 50,
+  "cooldownMinutes": 120,
+  "nextStartAt": null
+}
