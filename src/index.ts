@@ -502,7 +502,7 @@ function buildMediaByMode(mode: MediaMode) {
       : cfg.imagePath
       ? [cfg.imagePath]
       : []
-    ).filter((p) => p && fs.existsExistsSync(p as any));
+    ).filter((p) => p && fs.existsSync(p as any));
 
     for (const p of imgs) {
       media.push({ type: "image", path: p });
@@ -1574,15 +1574,18 @@ function appendHistoryRow(
   phone: string,
   name: string | undefined,
   status: string,
-  details: string
+  details: unknown      // ← было: string
 ) {
   ensureResultsHeader();
+
   const ts = new Date()
     .toISOString()
     .replace("T", " ")
     .replace("Z", "");
-  const safeName = String(name ?? "").replace(/,/g, " ");
-  const safeDetails = String(details ?? "").replace(/,/g, " ");
+
+  const safeName: string = String(name ?? "").replace(/,/g, " ");
+  const safeDetails: string = String(details ?? "").replace(/,/g, " ");
+
   const line = `${ts},${phone},${safeName},${status},${safeDetails}\n`;
   fs.appendFileSync(RESULTS_CSV, line, "utf8");
 }
