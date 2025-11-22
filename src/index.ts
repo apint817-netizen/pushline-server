@@ -1257,7 +1257,7 @@ async function sendOne(
               .filter(Boolean);
 
             const chosen = pickRandom(cleanVariants);
-            if (chosen) base = chosen;
+            if (chosen) base = String(chosen);
           }
 
           const finalText = renderTemplateWithName(base, name);
@@ -1283,7 +1283,7 @@ async function sendOne(
               .filter(Boolean);
 
             const chosen = pickRandom(clean);
-            if (chosen) baseCaption = chosen;
+            if (chosen) baseCaption = String(chosen);
           }
 
           if (baseCaption) {
