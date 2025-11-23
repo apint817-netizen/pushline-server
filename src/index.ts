@@ -1076,6 +1076,10 @@ app.get("/broadcast/script", (req, res) => {
   res.json({ ok: true, script });
 });
 
+app.get("/api/broadcast/script", (req, res) => (
+  (req.url = "/broadcast/script"), (app as any).handle(req, res)
+));
+
 app.post("/broadcast/script", (req, res) => {
   const { script } = req.body || {};
   if (!Array.isArray(script)) {
@@ -1133,6 +1137,10 @@ app.post("/broadcast/script", (req, res) => {
   writeBroadcastScript(normalized);
   res.json({ ok: true, saved: normalized.length });
 });
+
+app.post("/api/broadcast/script", (req, res) => (
+  (req.url = "/broadcast/script"), (app as any).handle(req, res)
+));
 
 // ================== AUTO-REPLIES ==================
 
@@ -1546,6 +1554,9 @@ async function fireHandler(req: express.Request, res: express.Response) {
     broadcastState.run.status = "done";
   }
 }
+
+app.post("/broadcast/fire", fireHandler);
+app.post("/api/broadcast/fire", fireHandler);
 
 /* ====== История рассылок ====== */
 
